@@ -1,5 +1,7 @@
 #pragma once
+#include <cmath>
 #include <limits>
+#include <iomanip>
 #include <sstream>
 #include <iostream>
 #include <stdexcept>
@@ -9,7 +11,7 @@ class ImpossibleConversionException: public std::exception
 	public:
 		virtual const char *what(void) const throw()
 		{
-			return ("impossible.");
+			return ("Impossible.");
 		}
 };
 

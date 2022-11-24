@@ -9,7 +9,7 @@ void checkForm(std::string &str)
 		i++;
 	while (str[i] >= '0' && str[i] <= '9')
 		i++;
-	if (str[i] == '.')
+	if (i && str[i] == '.' && str[i - 1] != '+' && str[i - 1] != '-')
 	{
 		check_f = true;
 		i++;
@@ -68,26 +68,34 @@ void printFloat(std::string &str)
 {
 	int intpart;
 	float decpart;
-	float nb;
+	double nb;
 	std::stringstream stream(str);
 
 	try
 	{
-		if (str == "-inf" || str == "-inff" || str == "+inf" || str == "+inff")
+		std::cout << "Float: ";
+		if (str == "-inff" || str == "+inff" || str == "inff"
+			|| str == "nanf" || str == "-inf" || str == "+inf"
+			|| str == "inf" || str == "nan")
 		{
-			str.erase(str.find('+'), 1);
-			std::cout << str << std::endl;
+			if (str.find('+') != std::string::npos)
+				str.erase(str.find('+'), 1);
+			std::cout << str;
+			if (str == "-inf" || str == "+inf" || str == "nan")
+				std::cout << "f";
+			std::cout << std::endl;
 			return ;
 		}
-		std::cout << "Float: ";
 		checkForm(str);
 		stream >> nb;
+		if (nb > std::numeric_limits<float>::max() || nb < std::numeric_limits<float>::min())
+			throw (ImpossibleConversionException());
 		intpart = static_cast<int>(nb);
 		decpart = static_cast<float>(nb - intpart);
 		if (!decpart)
 			std::cout << static_cast<float>(nb) << ".0f" << std::endl;
 		else
-			std::cout << static_cast<float>(nb) << "f" << std::endl;
+			std::cout << std::setprecision(8) << static_cast<float>(nb) << "f" << std::endl;
 	}
 	catch (std::exception const &e)
 	{
@@ -105,6 +113,18 @@ void printDouble(std::string &str)
 	try
 	{
 		std::cout << "Double: ";
+		if (str == "-inff" || str == "+inff" || str == "inff"
+			|| str == "nanf" || str == "-inf" || str == "+inf"
+			|| str == "inf" || str == "nan")
+		{
+			if (str == "-inff" || str == "+inff"
+				|| str == "nanf")
+				str.erase(str.size() - 1);
+			if (str.find('+') != std::string::npos)
+				str.erase(str.find('+'), 1);
+			std::cout << str << std::endl;
+			return ;
+		}
 		checkForm(str);
 		stream >> nb;
 		intpart = static_cast<int>(nb);
@@ -112,7 +132,7 @@ void printDouble(std::string &str)
 		if (!decpart)
 			std::cout << static_cast<double>(nb) << ".0" << std::endl;
 		else
-			std::cout << static_cast<double>(nb) << std::endl;
+			std::cout << std::setprecision(8) << static_cast<double>(nb) << std::endl;
 	}
 	catch(std::exception const &e)
 	{
