@@ -1,5 +1,20 @@
 #include "conversion.hpp"
 
+int get_precision(std::string const &str)
+{
+	size_t index;
+	size_t count;
+
+	count = 0;
+	index = str.find('.');
+	if (index == std::string::npos
+		|| str.find_first_not_of("0f", ++index) == std::string::npos)
+		return (0);
+	while (str[index + count] && str[index + count] != 'f')
+		count++;
+	return (count);
+}
+
 void checkForm(std::string &str)
 {
 	bool check_f = false;
@@ -19,123 +34,89 @@ void checkForm(std::string &str)
 	if (check_f && str[i] == 'f')
 		i++;
 	if (i != str.length())
-		throw (ImpossibleConversionException());
+		throw (FormatNotValidException());
 }
 
-void printChar(std::string &str)
+void print_char(double nb)
 {
-	int c;
-	std::stringstream stream(str);
+	char c;
 
-	try
+	std::cout << "Char: ";
+	if (nb < 0 || nb > 127 || std::isnan(nb))
 	{
-		std::cout << "Char: ";
-		checkForm(str);
-		stream >> c;
-		if (c < 0 || c > 127)
-			throw (ImpossibleConversionException());
-		else if (c < 32 || c == 127)
-			throw (NonDisplayableCharacterExcpetion());
-		std::cout << static_cast<char>(c) << std::endl;
+		std::cout << "Impossible." << std::endl;
+		return ;
 	}
-	catch (std::exception const &e)
+	if (nb < 32 || nb == 127)
 	{
-		std::cout << e.what() << std::endl;
+		std::cout << "Non displayable." << std::endl;
+		return ;
 	}
+	c = static_cast<char>(nb);
+	std::cout << c << std::endl;
 }
 
-void printInt(std::string &str)
+void print_int(double nb)
 {
-	long long int nb;
-	std::stringstream stream(str);
+	int n;
 
-	try
+	std::cout << "Int: ";
+	if (nb < std::numeric_limits<int>::min() || nb > std::numeric_limits<int>::max()
+		|| std::isnan(nb))
 	{
-		std::cout << "Int: ";
-		checkForm(str);
-		stream >> nb;
-		if (stream.str().length() > 10 || nb < std::numeric_limits<int>::min() || nb > std::numeric_limits<int>::max())
-			throw (ImpossibleConversionException());
-		std::cout << static_cast<int>(nb) << std::endl;
+		std::cout << "Impossible." << std::endl;
+		return ;
 	}
-	catch (std::exception const &e)
-	{
-		std::cout << e.what() << std::endl;
-	}
+	n = static_cast<int>(nb);
+	std::cout << n << std::endl;
 }
 
-void printFloat(std::string &str)
+void print_float(double nb, size_t prec)
 {
-	int intpart;
-	float decpart;
+	float f;
+
+	std::cout << "Float: ";
+
+	f = static_cast<float>(nb);
+	std::cout << std::fixed << std::setprecision(prec) << f << (prec ? "f" : ".0f") << std::endl;
+}
+
+void print_double(double nb, size_t prec)
+{
+	std::cout << "Double: ";
+	std::cout << std::fixed << std::setprecision(prec) << nb << (prec ? "" : ".0") << std::endl;
+}
+
+void get_type(std::string &str)
+{
 	double nb;
+	size_t prec;
 	std::stringstream stream(str);
 
 	try
 	{
-		std::cout << "Float: ";
-		if (str == "-inff" || str == "+inff" || str == "inff"
-			|| str == "nanf" || str == "-inf" || str == "+inf"
-			|| str == "inf" || str == "nan")
+		if (str == "-inf" || str == "+inf"
+			|| str == "+inff" || str == "-inff")
 		{
-			if (str.find('+') != std::string::npos)
-				str.erase(str.find('+'), 1);
-			std::cout << str;
-			if (str == "-inf" || str == "+inf" || str == "nan")
-				std::cout << "f";
-			std::cout << std::endl;
-			return ;
+			nb = std::numeric_limits<double>::infinity();
+			if (str == "-inf" || str == "-inff")
+				nb *= -1;
 		}
-		checkForm(str);
-		stream >> nb;
-		if (nb > std::numeric_limits<float>::max() || nb < std::numeric_limits<float>::min())
-			throw (ImpossibleConversionException());
-		intpart = static_cast<int>(nb);
-		decpart = static_cast<float>(nb - intpart);
-		if (!decpart)
-			std::cout << static_cast<float>(nb) << ".0f" << std::endl;
+		else if (str == "nan" || str == "nanf")
+			nb = std::numeric_limits<double>::quiet_NaN();
 		else
-			std::cout << std::setprecision(8) << static_cast<float>(nb) << "f" << std::endl;
+		{
+			checkForm(str);
+			stream >> nb;
+		}
+		prec = get_precision(str);
+		print_char(nb);
+		print_int(nb);
+		print_float(nb, prec);
+		print_double(nb, prec);
 	}
 	catch (std::exception const &e)
 	{
-		std::cout << e.what() << std::endl;
-	}
-}
-
-void printDouble(std::string &str)
-{
-	int intpart;
-	double decpart;
-	double nb;
-	std::stringstream stream(str);
-
-	try
-	{
-		std::cout << "Double: ";
-		if (str == "-inff" || str == "+inff" || str == "inff"
-			|| str == "nanf" || str == "-inf" || str == "+inf"
-			|| str == "inf" || str == "nan")
-		{
-			if (str == "-inff" || str == "+inff"
-				|| str == "nanf")
-				str.erase(str.size() - 1);
-			if (str.find('+') != std::string::npos)
-				str.erase(str.find('+'), 1);
-			std::cout << str << std::endl;
-			return ;
-		}
-		checkForm(str);
-		stream >> nb;
-		intpart = static_cast<int>(nb);
-		decpart = static_cast<double>(nb - intpart);
-		if (!decpart)
-			std::cout << static_cast<double>(nb) << ".0" << std::endl;
-		else
-			std::cout << std::setprecision(8) << static_cast<double>(nb) << std::endl;
-	}
-	catch(std::exception const &e)
-	{
-		std::cout << e.what() << std::endl;
+		std::cerr << e.what() << std::endl;
 	}
 }
