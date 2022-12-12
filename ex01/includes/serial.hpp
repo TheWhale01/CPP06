@@ -2,10 +2,9 @@
 #include <stdint.h>
 #include <iostream>
 
-typedef struct 
+typedef struct s_data
 {
-	public:
-		int raw;
+	int raw;
 } Data;
 
 Data *deserialize(uintptr_t raw);

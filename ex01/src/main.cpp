@@ -2,7 +2,7 @@
 
 int main(void)
 {
-	Data data = {45};
+	Data data = {42};
 
 	std::cout << deserialize(serialize(&data))->raw << std::endl;
 	return (0);

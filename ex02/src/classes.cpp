@@ -24,6 +24,7 @@ C::C(void)
 
 Base *Base::generate(void)
 {
+	srand(time(NULL));
 	int number = rand();
 
 	if (!(number % 3))
@@ -64,6 +65,7 @@ void Base::identify(Base &p)
 		Base &ref = dynamic_cast<A &>(p);
 		(void)ref;
 		std::cout << "Class type: A" << std::endl;
+		return ;
 	}
 	catch (std::exception const &e){}
 	try
@@ -71,6 +73,7 @@ void Base::identify(Base &p)
 		Base &ref = dynamic_cast<B &>(p);
 		(void)ref;
 		std::cout << "Class type: B" << std::endl;
+		return ;
 	}
 	catch (std::exception const &e){}
 	try
@@ -78,6 +81,7 @@ void Base::identify(Base &p)
 		Base &ref = dynamic_cast<C &>(p);
 		(void)ref;
 		std::cout << "Class type: C" << std::endl;
+		return ;
 	}
 	catch (std::exception const &e){}
 }
